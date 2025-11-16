@@ -1,2 +1,2 @@
 ## Dependecies
-i4 relies on scrot, xprintidle, picom, polybar, i3
+i4 relies on scrot, xprintidle, picom, polybar, i3, rofi
