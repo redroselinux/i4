@@ -1,22 +1,34 @@
 import os
+import subprocess
 import time
 
-def get_time_till_lock():
+def read_lock_timeout():
+    cfg_path = os.path.expanduser("~/.config/i4/i4timerc")
     try:
-        with open("/home/"+os.getlogin()+"/.config/i4/i4timerc", "r") as f:
-            time_till_lock = f.read
-        if time_till_lock == ".none":
-            exit()
+        with open(cfg_path, "r") as f:
+            value = f.read().strip()
+        if value == ".none":
+            return None
+        return int(value)
     except Exception:
-        time_till_lock = 600
-    return time_till_lock
+        return 600
 
-time_till_lock = get_time_till_lock()
+lock_timeout = read_lock_timeout()
+if lock_timeout is None:
+    exit()
+
+def get_idle_ms():
+    out = subprocess.check_output(["xprintidle"]).decode().strip()
+    return int(out)
 
 def main():
     while True:
-        time.sleep(time_till_lock)
-        os.system("i3lock -i assets/redrose.png")
+        idle_ms = get_idle_ms()
+        if idle_ms >= lock_timeout * 1000:
+            os.system("i3lock -i assets/redrose.png")
+            while get_idle_ms() >= 2000:
+                time.sleep(1)
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()
